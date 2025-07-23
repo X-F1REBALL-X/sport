@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>עדכוני ספורט חיים</title>
+  <style>
+    body{font-family:Arial;background:#fff;color:#333;margin:0;padding:0;}
+    h1{background:#007bff;color:#fff;padding:15px;text-align:center;margin:0;}
+    ul{list-style:none;padding:0;}
+    li{padding:8px;border-bottom:1px solid #ddd;}
+    a{color:#007bff;text-decoration:none;}
+    a:hover{text-decoration:underline;}
+  </style>
+</head>
+<body>
+  <h1>עדכוני ספורט חיים</h1>
+  <ul id="feed"></ul>
+<script>
+  const sites=["https://sports.walla.co.il/rss","https://www.one.co.il/rss.xml","https://www.ynet.co.il/sport/rss.xml","https://www.sport5.co.il/rss.xml"];
+  async function update(){
+    let all=[];
+    for(let url of sites){
+      try{
+        const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+        const doc=new DOMParser().parseFromString(await r.text(),"application/xml");
+        doc.querySelectorAll("item").forEach(it=>{
+          const t=it.querySelector("title")?.textContent;
+          const l=it.querySelector("link")?.textContent;
+          if(t&&l) all.push({t,l});
+        });
+      }catch{}
+    }
+    all=all.slice(0,50);
+    const ul=document.getElementById("feed");
+    ul.innerHTML=all.map(i=>`<li><a href="${i.l}" target="_blank">${i.t}</a></li>`).join("");
+  }
+  update(); setInterval(update,30000);
+</script>
+</body>
+</html>
